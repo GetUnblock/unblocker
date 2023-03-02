@@ -23,7 +23,7 @@ export default function App() {
         alert()
       }
       checkConnectionWallet();
-    }, 10000)
+    }, 60000)
 
     return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps

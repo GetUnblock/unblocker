@@ -4,14 +4,14 @@ import { Typography } from '@mui/material';
 import * as S from './style';
 
 export default function InfoDisclaimer(props: any) {
-    return (
-        <S.DisclaimerContainer>
-        <S.InfoButton>
-          <Info/>
-        </S.InfoButton>
-        <Typography variant="body1" gutterBottom>
-            {props.text}
-        </Typography>
-      </S.DisclaimerContainer>
-    );
+  return (
+    <S.DisclaimerContainer>
+      <S.InfoButton>
+        <Info />
+      </S.InfoButton>
+      <Typography variant="body1" gutterBottom>
+        {props.text}
+      </Typography>
+    </S.DisclaimerContainer>
+  );
 }
