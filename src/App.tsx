@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Container, Box, Button, Typography } from '@mui/material';
+import { Container, Box, Button, Typography, SelectChangeEvent } from '@mui/material';
 import { ethers } from 'ethers';
 import { generateNonce, SiweMessage } from 'siwe';
 import CodeSnippet from './components/CodeSnippet';
 import InfoDisclaimer from './components/InfoDisclaimer';
+import ModalDialog from './components/ModalDialog';
 
 export default function App() {
 
   const [connected, setConnected] = useState(false);
   const [currentAddress, setCurrentAddress] = useState('');
   const [currentMsg, setCurrentMsg] = useState('');
-  const domain = process.env.REACT_APP_DOMAIN_URL;
-  const chainId = Number(process.env.REACT_APP_CHAIN_ID);
+  const [openModal, setOpenModal] = useState(false);
+  const [url, setUrl] = useState('');
+  const [chainId, setChainId] = useState('');
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
   const disclaimerText = 'To Use a different wallet please disconnect the current one from Metamask widget and click on Connect to choose a different one';
@@ -28,6 +30,30 @@ export default function App() {
     return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    // Check if account is connected
+    checkConnectionWallet();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleClickOpen = () => {
+    setOpenModal(true);
+  };
+
+  const handleClose = () => {
+    setOpenModal(false);
+    setUrl('');
+    setChainId('');
+  };
+
+  const handleUrlChange = (event: SelectChangeEvent) => {
+    setUrl(event.target.value);
+  };
+
+  const handleChainChange = (event: SelectChangeEvent) => {
+    setChainId(event.target.value);
+  };
 
   const handleConnectWallet = async () => {
     await provider.send('eth_requestAccounts', [])
@@ -73,20 +99,21 @@ export default function App() {
       alert('Please connect to your wallet');
       return;
     }
-    // reset message
+    // reset message and close modal
     setCurrentMsg('');
-    if (!domain || !chainId) {
-      alert('Please set up the required env variables: REACT_APP_DOMAIN_URL and REACT_APP_CHAIN_ID');
-      return;
-    }
+    setOpenModal(false);
+
     const message = await createSiweMessage(
       await signer.getAddress(),
       'Sign in with Ethereum',
-      domain,
-      chainId
+      url,
+      Number(chainId),
     );
     const signature = await signer.signMessage(message);
 
+    // Reset URL and chainId
+    setUrl('');
+    setChainId('');
     if (signature) {
       setCurrentMsg(JSON.stringify({ message, signature }, null, 2));
     } else {
@@ -122,8 +149,18 @@ export default function App() {
         }
       </Box>
       <Box sx={{ my: 4 }}>
+        {/* 
+          <Button
+            onClick={signInWithEthereum}
+            variant="contained"
+            sx={{ backgroundColor: '#2A73FF' }}
+            disabled={!connected}
+          >
+            Generate Message & Signature
+          </Button>
+        */}
         <Button
-          onClick={signInWithEthereum}
+          onClick={handleClickOpen}
           variant="contained"
           sx={{ backgroundColor: '#2A73FF' }}
           disabled={!connected}
@@ -139,6 +176,15 @@ export default function App() {
           <CodeSnippet code={currentMsg} />
         </>
       }
+      <ModalDialog
+        open={openModal}
+        onClose={handleClose}
+        url={url}
+        onUrlChange={handleUrlChange}
+        chainId={chainId}
+        onChainChange={handleChainChange}
+        onSubmit={signInWithEthereum}
+      />
     </Container>
   );
 }
