@@ -5,6 +5,7 @@ import { generateNonce, SiweMessage } from 'siwe';
 import CodeSnippet from './components/CodeSnippet';
 import InfoDisclaimer from './components/InfoDisclaimer';
 import ModalDialog from './components/ModalDialog';
+import { CHAIN_LIST } from './utils';
 
 export default function App() {
 
@@ -14,9 +15,10 @@ export default function App() {
   const [openModal, setOpenModal] = useState(false);
   const [url, setUrl] = useState('');
   const [chainId, setChainId] = useState('');
+  const [chainDescription, setChainDescription] = useState('');
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
-  const disclaimerText = 'To Use a different wallet please disconnect the current one from Metamask widget and click on Connect to choose a different one';
+  const disclaimerText = 'Select only one wallet if you have multiple accounts on your metamask widget. To use a different wallet please disconnect the current one from Metamask widget and click on Connect to choose a different one.';
 
   useEffect(() => {
     // Check if account is still connected via metamask every 1m
@@ -45,14 +47,19 @@ export default function App() {
     setOpenModal(false);
     setUrl('');
     setChainId('');
+    setChainDescription('');
   };
 
   const handleUrlChange = (event: SelectChangeEvent) => {
-    setUrl(event.target.value);
-  };
 
-  const handleChainChange = (event: SelectChangeEvent) => {
-    setChainId(event.target.value);
+    const chainResult = CHAIN_LIST.filter((obj) => {
+      return obj.url === event.target.value;
+    });
+
+    // Set URL, Chain Id & Description
+    setUrl(event.target.value);
+    setChainId(chainResult[0].id);
+    setChainDescription(chainResult[0].description);
   };
 
   const handleConnectWallet = async () => {
@@ -149,16 +156,6 @@ export default function App() {
         }
       </Box>
       <Box sx={{ my: 4 }}>
-        {/* 
-          <Button
-            onClick={signInWithEthereum}
-            variant="contained"
-            sx={{ backgroundColor: '#2A73FF' }}
-            disabled={!connected}
-          >
-            Generate Message & Signature
-          </Button>
-        */}
         <Button
           onClick={handleClickOpen}
           variant="contained"
@@ -182,7 +179,7 @@ export default function App() {
         url={url}
         onUrlChange={handleUrlChange}
         chainId={chainId}
-        onChainChange={handleChainChange}
+        chainDescription={chainDescription}
         onSubmit={signInWithEthereum}
       />
     </Container>

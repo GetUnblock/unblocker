@@ -9,6 +9,7 @@ import {
   TextField,
   Box,
 } from '@mui/material/';
+import { URL_LIST } from '../../utils';
 
 export default function ModalDialog(props: any) {
 
@@ -29,31 +30,26 @@ export default function ModalDialog(props: any) {
               select
               label="URL"
             >
-              <MenuItem value={"https://sandbox.getunblock.com"}>Unblock Sandbox</MenuItem>
-              <MenuItem value={"https://sandbox.getunblock.com/fiat-connect"}>Unblock FC Sandbox</MenuItem>
-              <MenuItem value={"https://getunblock.com"}>Unblock Prod</MenuItem>
-              <MenuItem value={"https://getunblock.com/fiat-connect"}>Unblock FC Prod</MenuItem>
+              {URL_LIST.map((item: any, index) => (
+                <MenuItem key={index} value={item.url}>{item.description}</MenuItem>
+              ))}
             </TextField>
           </Box>
           <Box>
-            <TextField
-              sx={{ width: "50%" }}
-              variant="outlined"
-              value={props.chainId}
-              onChange={props.onChainChange}
-              select
-              label="Chain Id"
-            >
-              <MenuItem value={"137"}>Polygon Mainet</MenuItem>
-              <MenuItem value={"80001"}>Mumbai Testnet</MenuItem>
-              <MenuItem value={"42220"}>Celo Mainet</MenuItem>
-              <MenuItem value={"44787"}>Celo (Alfajores Testnet)</MenuItem>
-            </TextField>
+            {props.url &&
+              <TextField
+                sx={{ width: "50%" }}
+                variant="outlined"
+                value={`${props.chainId} - ${props.chainDescription}`}
+                label="Chain Id"
+                disabled={true}
+              />
+            }
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={props.onClose}>Cancel</Button>
-          <Button onClick={props.onSubmit}>Generate</Button>
+          <Button onClick={props.onSubmit} disabled={!props.url}>Generate</Button>
         </DialogActions>
       </Dialog>
     </div>
