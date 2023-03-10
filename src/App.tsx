@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Container, Box, Button, Typography, SelectChangeEvent } from '@mui/material';
 import { ethers } from 'ethers';
 import { generateNonce, SiweMessage } from 'siwe';
@@ -6,6 +7,7 @@ import CodeSnippet from './components/CodeSnippet';
 import InfoDisclaimer from './components/InfoDisclaimer';
 import ModalDialog from './components/ModalDialog';
 import { CHAIN_LIST } from './utils';
+import ModalLoginDialog from './components/ModalLoginDialog';
 
 export default function App() {
 
@@ -13,12 +15,15 @@ export default function App() {
   const [currentAddress, setCurrentAddress] = useState('');
   const [currentMsg, setCurrentMsg] = useState('');
   const [openModal, setOpenModal] = useState(false);
+  const [openLoginModal, setOpenLoginModal] = useState(false);
   const [url, setUrl] = useState('');
   const [chainId, setChainId] = useState('');
   const [chainDescription, setChainDescription] = useState('');
+  const [apiKey, setApiKey] = useState('');
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
   const disclaimerText = 'Select only one wallet if you have multiple accounts on your metamask widget. To use a different wallet please disconnect the current one from Metamask widget and click on Connect to choose a different one.';
+  const disclaimerMessageText = 'Copy the object below and use it on Postman or any similar tool to login on the selected URL or click on the login button.';
 
   useEffect(() => {
     // Check if account is still connected via metamask every 1m
@@ -39,7 +44,10 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleClickOpen = () => {
+  const handleModalOpen = () => {
+    setCurrentMsg('');
+    setUrl('');
+    setChainId('');
     setOpenModal(true);
   };
 
@@ -107,7 +115,6 @@ export default function App() {
       return;
     }
     // reset message and close modal
-    setCurrentMsg('');
     setOpenModal(false);
 
     const message = await createSiweMessage(
@@ -118,15 +125,51 @@ export default function App() {
     );
     const signature = await signer.signMessage(message);
 
-    // Reset URL and chainId
-    setUrl('');
-    setChainId('');
     if (signature) {
       setCurrentMsg(JSON.stringify({ message, signature }, null, 2));
     } else {
       alert('Unable to generate message with signature. Please try again');
     }
   }
+
+  const handleLoginModal = () => {
+    setOpenLoginModal(true);
+  };
+
+  const handleLoginCloseModal = () => {
+    setOpenLoginModal(false);
+    setApiKey('');
+  };
+
+  const handleApiChange = (event: any) => {
+    console.log('my api key is:', event.target.value);
+    setApiKey(event.target.value);
+  };
+
+  const handleLogin = async () => {
+    setOpenLoginModal(false)
+    // Parse loginBody
+    const loginBody = JSON.parse(currentMsg);
+
+    const config = {
+      headers:{
+        Authorization: apiKey,
+      }
+    };
+
+    if (url && apiKey) {
+      await axios.post(`${url}/auth/login`,loginBody, config)
+      .then(res => {
+        console.log(res);
+        console.log('Login data', res.data);
+      })
+      .catch(error => {
+        alert('Failed to login with error: ' + error);
+      });
+    }
+
+    setApiKey('');
+  };
 
   return (
     <Container>
@@ -157,7 +200,7 @@ export default function App() {
       </Box>
       <Box sx={{ my: 4 }}>
         <Button
-          onClick={handleClickOpen}
+          onClick={handleModalOpen}
           variant="contained"
           sx={{ backgroundColor: '#2A73FF' }}
           disabled={!connected}
@@ -167,10 +210,19 @@ export default function App() {
       </Box>
       {currentMsg &&
         <>
+          <InfoDisclaimer text={disclaimerMessageText} />
           <Typography variant="body1" gutterBottom>
-            Generated message and signature:
+            {`Use the message below to login on this endpoint:  ${url}/auth/login`}
           </Typography>
           <CodeSnippet code={currentMsg} />
+          <Button
+            onClick={handleLoginModal}
+            variant="contained"
+            sx={{ backgroundColor: '#2A73FF' }}
+            disabled={!connected}
+          >
+            Login
+          </Button>
         </>
       }
       <ModalDialog
@@ -181,6 +233,14 @@ export default function App() {
         chainId={chainId}
         chainDescription={chainDescription}
         onSubmit={signInWithEthereum}
+      />
+      <ModalLoginDialog
+        open={openLoginModal}
+        onClose={handleLoginCloseModal}
+        url={url}
+        apiKey={apiKey}
+        onChange={handleApiChange}
+        onSubmit={handleLogin}
       />
     </Container>
   );

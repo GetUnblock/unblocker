@@ -1,5 +1,9 @@
 export const URL_LIST = [
     {
+        url: "https://dev.getunblock.com",
+        description: "Unblock Dev",
+    },
+    {
         url: "https://sandbox.getunblock.com",
         description: "Unblock Sandbox",
     },
@@ -18,6 +22,11 @@ export const URL_LIST = [
 ];
 
 export const CHAIN_LIST = [
+    {
+        id: "80001",
+        description: "Mumbai Testnet",
+        url: "https://dev.getunblock.com",
+    },
     {
         id: "137",
         description: "Polygon Mainet",
