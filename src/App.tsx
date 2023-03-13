@@ -90,7 +90,8 @@ export default function App() {
       } else {
         setCurrentAddress('');
         setConnected(false);
-        setCurrentMsg('')
+        setCurrentMsg('');
+        setCurrentSession('');
       }
     })
   };
