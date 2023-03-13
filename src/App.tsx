@@ -30,9 +30,6 @@ export default function App() {
   useEffect(() => {
     // Check if account is still connected via metamask every 1m
     const intervalId = setInterval(() => {
-      if (!provider) {
-        alert()
-      }
       checkConnectionWallet();
     }, 60000)
 
