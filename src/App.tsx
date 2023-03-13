@@ -214,7 +214,10 @@ export default function App() {
         <>
           <InfoDisclaimer text={disclaimerMessageText} />
           <Typography variant="body1" gutterBottom>
-            {`Use the message below to login on this endpoint:  ${url}/auth/login`}
+            Login endpoint:&nbsp;
+            <Box component="span" fontWeight='bold'>
+              {`${url}/auth/login`}
+            </Box>
           </Typography>
           <CodeSnippet code={currentMsg} />
           <Button
