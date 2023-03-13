@@ -20,10 +20,12 @@ export default function App() {
   const [chainId, setChainId] = useState('');
   const [chainDescription, setChainDescription] = useState('');
   const [apiKey, setApiKey] = useState('');
+  const [currentSession, setCurrentSession] = useState('');
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
   const disclaimerText = 'Select only one wallet if you have multiple accounts on your metamask widget. To use a different wallet please disconnect the current one from Metamask widget and click on Connect to choose a different one.';
   const disclaimerMessageText = 'Copy the object below and use it on Postman or any similar tool to login on the selected URL or click on the login button.';
+  const disclaimerLogin = 'Do no attempt to login more than once with the same SIWE message (nonce will be in use) - generate a new message then login';
 
   useEffect(() => {
     // Check if account is still connected via metamask every 1m
@@ -48,6 +50,7 @@ export default function App() {
     setCurrentMsg('');
     setUrl('');
     setChainId('');
+    setCurrentSession('');
     setOpenModal(true);
   };
 
@@ -142,7 +145,6 @@ export default function App() {
   };
 
   const handleApiChange = (event: any) => {
-    console.log('my api key is:', event.target.value);
     setApiKey(event.target.value);
   };
 
@@ -152,20 +154,19 @@ export default function App() {
     const loginBody = JSON.parse(currentMsg);
 
     const config = {
-      headers:{
+      headers: {
         Authorization: apiKey,
-      }
+      },
     };
 
     if (url && apiKey) {
-      await axios.post(`${url}/auth/login`,loginBody, config)
-      .then(res => {
-        console.log(res);
-        console.log('Login data', res.data);
-      })
-      .catch(error => {
-        alert('Failed to login with error: ' + error);
-      });
+      await axios.post(`${url}/auth/login`, loginBody, config)
+        .then(res => {
+          setCurrentSession(res.data.unblock_session_id);
+        })
+        .catch(error => {
+          alert('Failed to login with error: ' + error);
+        });
     }
 
     setApiKey('');
@@ -174,7 +175,7 @@ export default function App() {
   return (
     <Container>
       <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom align="center">
+        <Typography variant="h4" component="h1" align="center">
           Generate a Siwe Message and signature
         </Typography>
       </Box>
@@ -193,7 +194,7 @@ export default function App() {
           Connection Status:
         </Typography>
         {connected &&
-          <Typography variant="body1" gutterBottom>
+          <Typography variant="body1">
             {`Connected to wallet with address:  ${currentAddress}`}
           </Typography>
         }
@@ -224,6 +225,19 @@ export default function App() {
             Login
           </Button>
         </>
+      }
+      {currentSession &&
+        <Box sx={{ my: 4 }}>
+          <InfoDisclaimer text={disclaimerLogin} />
+          <Typography component='div'>
+            Copy the Session ID below to use on any endpoint that requires&nbsp;
+            <Box component="span" fontWeight='bold'>
+               unblock-session-id
+            </Box> 
+            &nbsp;header field:
+          </Typography>
+          <CodeSnippet code={currentSession} />
+        </Box>
       }
       <ModalDialog
         open={openModal}
