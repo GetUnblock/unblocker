@@ -50,7 +50,10 @@ export default function ModalDialog(props: any) {
         <DialogActions>
           <Button
             variant="contained"
-            sx={{ backgroundColor: '#FB4219' }}
+            sx={{
+              backgroundColor: '#FF0000',
+              '&:hover': { backgroundColor: '#E50000' },
+            }}
             onClick={props.onClose}
           >
             Cancel
