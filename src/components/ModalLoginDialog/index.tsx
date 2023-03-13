@@ -38,8 +38,21 @@ export default function ModalLoginDialog(props: any) {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={props.onClose}>Cancel</Button>
-          <Button onClick={props.onSubmit} disabled={!props.apiKey}>Login</Button>
+          <Button
+            variant="contained"
+            sx={{ backgroundColor: '#FB4219' }}
+            onClick={props.onClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            sx={{ backgroundColor: '#2A73FF' }}
+            onClick={props.onSubmit}
+            disabled={!props.apiKey}
+          >
+            Login
+          </Button>
         </DialogActions>
       </Dialog>
     </div>
