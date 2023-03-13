@@ -165,7 +165,8 @@ export default function App() {
           setCurrentSession(res.data.unblock_session_id);
         })
         .catch(error => {
-          alert('Failed to login with error: ' + error);
+          alert('Failed to login with error: ' + error +
+            '\n Please try again or ensure you are not trying to login with the same SIWE message');
         });
     }
 
@@ -232,8 +233,8 @@ export default function App() {
           <Typography component='div'>
             Copy the Session ID below to use on any endpoint that requires&nbsp;
             <Box component="span" fontWeight='bold'>
-               unblock-session-id
-            </Box> 
+              unblock-session-id
+            </Box>
             &nbsp;header field:
           </Typography>
           <CodeSnippet code={currentSession} />
