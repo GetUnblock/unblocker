@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ContentCopy, ContentPaste } from '@mui/icons-material/';
+import { Snackbar } from '@mui/material'
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -28,6 +29,13 @@ export default function CodeSnippet(props: any) {
           </S.IconClickableContainer>
         </CopyToClipboard>
       </S.ClipboardContainer>
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        open={isCopied}
+        onClose={() => setIsCopied(false)}
+        autoHideDuration={2000}
+        message="Copied to clipboard"
+      />
     </S.Container>
   );
 }
