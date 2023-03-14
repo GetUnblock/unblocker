@@ -14,17 +14,7 @@ Clone the repository and run:
 yarn
 ```
 
-Before starting the app create a .env on the root project folder.
-The file .env.example contains the variables needed and the possible values
-
-```
-REACT_APP_DOMAIN_URL= <domain_url>
-REACT_APP_CHAIN_ID=<chain_id>
-```
-
-Important: At the moment only these chains are suported: Celo (Main & Testnet) and Polygon (Main & Testnet)
-
-After the .env file has been setup start the app by running this command:
+After the dependencies are installed start the app by running this command:
 
 ```
 yarn start

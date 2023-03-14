@@ -1,33 +1,74 @@
 import { useState, useEffect } from 'react';
-import { Container, Box, Button, Typography } from '@mui/material';
+import axios from 'axios';
+import { Container, Box, Button, Typography, SelectChangeEvent } from '@mui/material';
 import { ethers } from 'ethers';
 import { generateNonce, SiweMessage } from 'siwe';
 import CodeSnippet from './components/CodeSnippet';
 import InfoDisclaimer from './components/InfoDisclaimer';
+import ModalDialog from './components/ModalDialog';
+import { CHAIN_LIST } from './utils';
+import ModalLoginDialog from './components/ModalLoginDialog';
 
 export default function App() {
 
   const [connected, setConnected] = useState(false);
   const [currentAddress, setCurrentAddress] = useState('');
   const [currentMsg, setCurrentMsg] = useState('');
-  const domain = process.env.REACT_APP_DOMAIN_URL;
-  const chainId = Number(process.env.REACT_APP_CHAIN_ID);
+  const [openModal, setOpenModal] = useState(false);
+  const [openLoginModal, setOpenLoginModal] = useState(false);
+  const [url, setUrl] = useState('');
+  const [chainId, setChainId] = useState('');
+  const [chainDescription, setChainDescription] = useState('');
+  const [apiKey, setApiKey] = useState('');
+  const [currentSession, setCurrentSession] = useState('');
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
-  const disclaimerText = 'To Use a different wallet please disconnect the current one from Metamask widget and click on Connect to choose a different one';
+  const disclaimerText = 'Select only one wallet if you have multiple accounts on your metamask widget. To use a different wallet please disconnect the current one from Metamask widget and click on Connect to choose a different one.';
+  const disclaimerMessageText = 'Copy the object below and use it on Postman or any similar tool to login on the selected URL or click on the login button.';
+  const disclaimerLogin = 'Do no attempt to login more than once with the same SIWE message (nonce will be in use) - generate a new message then login';
 
   useEffect(() => {
     // Check if account is still connected via metamask every 1m
     const intervalId = setInterval(() => {
-      if (!provider) {
-        alert()
-      }
       checkConnectionWallet();
     }, 60000)
 
     return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    // Check if account is connected
+    checkConnectionWallet();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleModalOpen = () => {
+    setCurrentMsg('');
+    setUrl('');
+    setChainId('');
+    setCurrentSession('');
+    setOpenModal(true);
+  };
+
+  const handleClose = () => {
+    setOpenModal(false);
+    setUrl('');
+    setChainId('');
+    setChainDescription('');
+  };
+
+  const handleUrlChange = (event: SelectChangeEvent) => {
+
+    const chainResult = CHAIN_LIST.filter((obj) => {
+      return obj.url === event.target.value;
+    });
+
+    // Set URL, Chain Id & Description
+    setUrl(event.target.value);
+    setChainId(chainResult[0].id);
+    setChainDescription(chainResult[0].description);
+  };
 
   const handleConnectWallet = async () => {
     await provider.send('eth_requestAccounts', [])
@@ -46,7 +87,8 @@ export default function App() {
       } else {
         setCurrentAddress('');
         setConnected(false);
-        setCurrentMsg('')
+        setCurrentMsg('');
+        setCurrentSession('');
       }
     })
   };
@@ -73,17 +115,14 @@ export default function App() {
       alert('Please connect to your wallet');
       return;
     }
-    // reset message
-    setCurrentMsg('');
-    if (!domain || !chainId) {
-      alert('Please set up the required env variables: REACT_APP_DOMAIN_URL and REACT_APP_CHAIN_ID');
-      return;
-    }
+    // reset message and close modal
+    setOpenModal(false);
+
     const message = await createSiweMessage(
       await signer.getAddress(),
       'Sign in with Ethereum',
-      domain,
-      chainId
+      url,
+      Number(chainId),
     );
     const signature = await signer.signMessage(message);
 
@@ -94,10 +133,48 @@ export default function App() {
     }
   }
 
+  const handleLoginModal = () => {
+    setOpenLoginModal(true);
+  };
+
+  const handleLoginCloseModal = () => {
+    setOpenLoginModal(false);
+    setApiKey('');
+  };
+
+  const handleApiChange = (event: any) => {
+    setApiKey(event.target.value);
+  };
+
+  const handleLogin = async () => {
+    setOpenLoginModal(false)
+    // Parse loginBody
+    const loginBody = JSON.parse(currentMsg);
+
+    const config = {
+      headers: {
+        Authorization: apiKey,
+      },
+    };
+
+    if (url && apiKey) {
+      await axios.post(`${url}/auth/login`, loginBody, config)
+        .then(res => {
+          setCurrentSession(res.data.unblock_session_id);
+        })
+        .catch(error => {
+          alert('Failed to login with error: ' + error +
+            '\n Please try again or ensure you are not trying to login with the same SIWE message');
+        });
+    }
+
+    setApiKey('');
+  };
+
   return (
     <Container>
       <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom align="center">
+        <Typography variant="h4" component="h1" align="center">
           Generate a Siwe Message and signature
         </Typography>
       </Box>
@@ -116,14 +193,14 @@ export default function App() {
           Connection Status:
         </Typography>
         {connected &&
-          <Typography variant="body1" gutterBottom>
+          <Typography variant="body1">
             {`Connected to wallet with address:  ${currentAddress}`}
           </Typography>
         }
       </Box>
       <Box sx={{ my: 4 }}>
         <Button
-          onClick={signInWithEthereum}
+          onClick={handleModalOpen}
           variant="contained"
           sx={{ backgroundColor: '#2A73FF' }}
           disabled={!connected}
@@ -133,12 +210,54 @@ export default function App() {
       </Box>
       {currentMsg &&
         <>
+          <InfoDisclaimer text={disclaimerMessageText} />
           <Typography variant="body1" gutterBottom>
-            Generated message and signature:
+            Login endpoint:&nbsp;
+            <Box component="span" fontWeight='bold'>
+              {`${url}/auth/login`}
+            </Box>
           </Typography>
           <CodeSnippet code={currentMsg} />
+          <Button
+            onClick={handleLoginModal}
+            variant="contained"
+            sx={{ backgroundColor: '#2A73FF' }}
+            disabled={!connected}
+          >
+            Login
+          </Button>
         </>
       }
+      {currentSession &&
+        <Box sx={{ my: 4 }}>
+          <InfoDisclaimer text={disclaimerLogin} />
+          <Typography component='div'>
+            Copy the Session ID below to use on any endpoint that requires&nbsp;
+            <Box component="span" fontWeight='bold'>
+              unblock-session-id
+            </Box>
+            &nbsp;header field:
+          </Typography>
+          <CodeSnippet code={currentSession} />
+        </Box>
+      }
+      <ModalDialog
+        open={openModal}
+        onClose={handleClose}
+        url={url}
+        onUrlChange={handleUrlChange}
+        chainId={chainId}
+        chainDescription={chainDescription}
+        onSubmit={signInWithEthereum}
+      />
+      <ModalLoginDialog
+        open={openLoginModal}
+        onClose={handleLoginCloseModal}
+        url={url}
+        apiKey={apiKey}
+        onChange={handleApiChange}
+        onSubmit={handleLogin}
+      />
     </Container>
   );
 }
