@@ -26,6 +26,7 @@ export default function ModalLoginDialog(props: any) {
               variant="outlined"
               onChange={props.onChange}
               label="API Key"
+              autoComplete='off'
             >
             </TextField>
           </Box>
