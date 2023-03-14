@@ -8,11 +8,11 @@ export const URL_LIST = [
         description: "Unblock Fiat-Connect Sandbox",
     },
     {
-        url: "https://getunblock.com",
+        url: "https://api.getunblock.com",
         description: "Unblock Prod",
     },
     {
-        url: "https://getunblock.com/fiat-connect",
+        url: "https://api.getunblock.com/fiat-connect",
         description: "Unblock Fiat-Connect Prod",
     }
 ];
@@ -21,7 +21,7 @@ export const CHAIN_LIST = [
     {
         id: "137",
         description: "Polygon Mainet",
-        url: "https://getunblock.com",
+        url: "https://api.getunblock.com",
     },
     {
         id: "80001",
@@ -31,7 +31,7 @@ export const CHAIN_LIST = [
     {
         id: "42220",
         description: "Celo Mainet",
-        url: "https://getunblock.com/fiat-connect",
+        url: "https://api.getunblock.com/fiat-connect",
     },
     {
         id: "44787",
