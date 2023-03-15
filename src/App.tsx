@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Box, Button, Typography, SelectChangeEvent } from '@mui/material';
+import {
+  Container,
+  Box,
+  Button,
+  Typography,
+  SelectChangeEvent,
+  Backdrop,
+  CircularProgress,
+  AppBar,
+  Toolbar,
+  Link,
+} from '@mui/material';
 import { ethers } from 'ethers';
 import { generateNonce, SiweMessage } from 'siwe';
 import CodeSnippet from './components/CodeSnippet';
@@ -8,6 +19,7 @@ import InfoDisclaimer from './components/InfoDisclaimer';
 import ModalDialog from './components/ModalDialog';
 import { CHAIN_LIST } from './utils';
 import ModalLoginDialog from './components/ModalLoginDialog';
+import logo from './assets/UnblockLogo.png'
 
 export default function App() {
 
@@ -16,6 +28,7 @@ export default function App() {
   const [currentMsg, setCurrentMsg] = useState('');
   const [openModal, setOpenModal] = useState(false);
   const [openLoginModal, setOpenLoginModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState('');
   const [chainId, setChainId] = useState('');
   const [chainDescription, setChainDescription] = useState('');
@@ -95,8 +108,8 @@ export default function App() {
 
   const createSiweMessage = (address: string, statement: string, domain: string, chainId: number) => {
     const domainUrl = new URL(domain);
-    const SESSION_DURATION_MS = 1000 * 60 * 60 * 4 // 4 hours (max allowed)
-    const expirationDate = new Date(Date.now() + SESSION_DURATION_MS)
+    const SESSION_DURATION_MS = 1000 * 60 * 60 * 4; // 4 hours (max allowed)
+    const expirationDate = new Date(Date.now() + SESSION_DURATION_MS);
     const message = new SiweMessage({
       domain: domainUrl.hostname,
       address: address,
@@ -147,7 +160,8 @@ export default function App() {
   };
 
   const handleLogin = async () => {
-    setOpenLoginModal(false)
+    setOpenLoginModal(false);
+    setLoading(true);
     // Parse loginBody
     const loginBody = JSON.parse(currentMsg);
 
@@ -161,103 +175,126 @@ export default function App() {
       await axios.post(`${url}/auth/login`, loginBody, config)
         .then(res => {
           setCurrentSession(res.data.unblock_session_id);
+          setLoading(false);
         })
         .catch(error => {
+          setLoading(false);
           alert('Failed to login with error: ' + error +
             '\n Please try again or ensure you are not trying to login with the same SIWE message');
         });
     }
-
     setApiKey('');
   };
 
   return (
-    <Container>
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" align="center">
-          Generate a Siwe Message and signature
-        </Typography>
-      </Box>
-      <Box sx={{ my: 4 }}>
-        <InfoDisclaimer text={disclaimerText} />
-        <Button
-          onClick={handleConnectWallet}
-          variant="contained"
-          sx={{ backgroundColor: '#2A73FF' }}
-        >
-          Connect to your wallet
-        </Button>
-      </Box>
-      <Box sx={{ my: 4 }}>
-        <Typography variant="body1" sx={{ fontWeight: 'bold' }} gutterBottom>
-          Connection Status:
-        </Typography>
-        {connected &&
-          <Typography variant="body1">
-            {`Connected to wallet with address:  ${currentAddress}`}
+    <>
+      <AppBar position="static" style={{ background: '#D3D3D3' }}>
+        <Toolbar>
+          <Link href="/">
+            <Box
+              component="img"
+              sx={{
+                height: 40,
+                width: 200,
+              }}
+              src={logo}
+            />
+          </Link>
+        </Toolbar>
+      </AppBar>
+      <Container>
+        <Box sx={{ my: 2 }}>
+          <Typography variant="h4" component="h1" align="center">
+            Generate a Siwe Message and signature
           </Typography>
-        }
-      </Box>
-      <Box sx={{ my: 4 }}>
-        <Button
-          onClick={handleModalOpen}
-          variant="contained"
-          sx={{ backgroundColor: '#2A73FF' }}
-          disabled={!connected}
-        >
-          Generate Message & Signature
-        </Button>
-      </Box>
-      {currentMsg &&
-        <>
-          <InfoDisclaimer text={disclaimerMessageText} />
-          <Typography variant="body1" gutterBottom>
-            Login endpoint:&nbsp;
-            <Box component="span" fontWeight='bold'>
-              {`${url}/auth/login`}
-            </Box>
-          </Typography>
-          <CodeSnippet code={currentMsg} />
+        </Box>
+        <Box sx={{ my: 4 }}>
+          <InfoDisclaimer text={disclaimerText} />
           <Button
-            onClick={handleLoginModal}
+            onClick={handleConnectWallet}
+            variant="contained"
+            sx={{ backgroundColor: '#2A73FF' }}
+          >
+            Connect to your wallet
+          </Button>
+        </Box>
+        <Box sx={{ my: 4 }}>
+          <Typography variant="body1" sx={{ fontWeight: 'bold' }} gutterBottom>
+            Connection Status:
+          </Typography>
+          {connected &&
+            <Typography variant="body1">
+              {`Connected to wallet with address:  ${currentAddress}`}
+            </Typography>
+          }
+        </Box>
+        <Box sx={{ my: 4 }}>
+          <Button
+            onClick={handleModalOpen}
             variant="contained"
             sx={{ backgroundColor: '#2A73FF' }}
             disabled={!connected}
           >
-            Login
+            Generate Message & Signature
           </Button>
-        </>
-      }
-      {currentSession &&
-        <Box sx={{ my: 4 }}>
-          <InfoDisclaimer text={disclaimerLogin} />
-          <Typography component='div'>
-            Copy the Session ID below to use on any endpoint that requires&nbsp;
-            <Box component="span" fontWeight='bold'>
-              unblock-session-id
-            </Box>
-            &nbsp;header field:
-          </Typography>
-          <CodeSnippet code={currentSession} />
         </Box>
-      }
-      <ModalDialog
-        open={openModal}
-        onClose={handleClose}
-        url={url}
-        onUrlChange={handleUrlChange}
-        chainId={chainId}
-        chainDescription={chainDescription}
-        onSubmit={signInWithEthereum}
-      />
-      <ModalLoginDialog
-        open={openLoginModal}
-        onClose={handleLoginCloseModal}
-        url={url}
-        apiKey={apiKey}
-        onChange={handleApiChange}
-        onSubmit={handleLogin}
-      />
-    </Container>
+        {currentMsg &&
+          <>
+            <InfoDisclaimer text={disclaimerMessageText} />
+            <Typography variant="body1" gutterBottom>
+              Login endpoint:&nbsp;
+              <Box component="span" fontWeight='bold'>
+                {`${url}/auth/login`}
+              </Box>
+            </Typography>
+            <CodeSnippet code={currentMsg} />
+            <Button
+              onClick={handleLoginModal}
+              variant="contained"
+              sx={{ backgroundColor: '#2A73FF' }}
+              disabled={!connected}
+            >
+              Login
+            </Button>
+          </>
+        }
+        {currentSession &&
+          <Box sx={{ my: 4 }}>
+            <InfoDisclaimer text={disclaimerLogin} />
+            <Typography component='div'>
+              Copy the Session ID below to use on any endpoint that requires&nbsp;
+              <Box component="span" fontWeight='bold'>
+                unblock-session-id
+              </Box>
+              &nbsp;header field:
+            </Typography>
+            <CodeSnippet code={currentSession} />
+          </Box>
+        }
+        <ModalDialog
+          open={openModal}
+          onClose={handleClose}
+          url={url}
+          onUrlChange={handleUrlChange}
+          chainId={chainId}
+          chainDescription={chainDescription}
+          onSubmit={signInWithEthereum}
+        />
+        <ModalLoginDialog
+          open={openLoginModal}
+          onClose={handleLoginCloseModal}
+          url={url}
+          apiKey={apiKey}
+          onChange={handleApiChange}
+          onSubmit={handleLogin}
+        />
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      </Container>
+    </>
   );
 }
