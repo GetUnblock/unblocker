@@ -19,7 +19,7 @@ export default function ModalDialog(props: any) {
         <DialogTitle>Select URL and Chain Id</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ marginBottom: "20px" }}>
-            To generate a signed Siwe message please select the URL and Chain Id.
+            To generate a signed Siwe message please select the desired URL.
           </DialogContentText>
           <Box>
             <TextField

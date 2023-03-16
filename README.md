@@ -1,4 +1,4 @@
-# Siwe-local
+# Unblocker
 
 This app allows the possibility to create Siwe Messages and sign them via Metamask. 
 It returns a JSON object that can be copied and used via Postman or any other similar app to login
