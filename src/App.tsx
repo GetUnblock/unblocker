@@ -95,11 +95,11 @@ export default function App() {
 
       // Connect to metamask
       await provider.send('eth_requestAccounts', [])
-      .then(response => {
-        setCurrentAddress(response);
-        setConnected(true);
-      })
-      .catch(() => alert('User rejected connection to Metamask'));
+        .then(response => {
+          setCurrentAddress(response);
+          setConnected(true);
+        })
+        .catch(() => alert('User rejected connection to Metamask'));
 
     } else {
       alert(`Already connected with wallet: ${response}`);
@@ -145,18 +145,18 @@ export default function App() {
     // reset message and close modal
     setOpenModal(false);
 
-    const message = await createSiweMessage(
+    const message = createSiweMessage(
       await signer.getAddress(),
       'Sign in with Ethereum',
       url,
       Number(chainId),
     );
-    const signature = await signer.signMessage(message);
-
-    if (signature) {
+    try {
+      // request signMessage on Metamask
+      const signature = await signer.signMessage(message);
       setCurrentMsg(JSON.stringify({ message, signature }, null, 2));
-    } else {
-      alert('Unable to generate message with signature. Please try again');
+    } catch {
+      alert('User rejected signing the message. Please try again.');
     }
   }
 
