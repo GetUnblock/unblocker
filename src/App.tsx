@@ -11,6 +11,7 @@ import {
   AppBar,
   Toolbar,
   Link,
+  Divider,
 } from '@mui/material';
 import { ethers } from 'ethers';
 import { generateNonce, SiweMessage } from 'siwe';
@@ -204,7 +205,7 @@ export default function App() {
     <>
       <AppBar position="static" style={{ background: '#D3D3D3' }}>
         <Toolbar>
-          <Link href="/">
+          <Link href="/" sx={{ flexGrow: 1 }}>
             <Box
               component="img"
               sx={{
@@ -214,6 +215,11 @@ export default function App() {
               src={logo}
             />
           </Link>
+          <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+            <Button sx={{ color: 'black' }}>
+                Base64 Converter
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
       <Container>
