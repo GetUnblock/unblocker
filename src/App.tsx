@@ -84,16 +84,30 @@ export default function App() {
   };
 
   const handleConnectWallet = async () => {
-    await provider.send('eth_requestAccounts', [])
+    // Check if connection still exists
+    const response = await provider.send('eth_accounts', []);
+    if (response.length === 0) {
+      // reset all state variables
+      setCurrentAddress('');
+      setConnected(false);
+      setCurrentMsg('');
+      setCurrentSession('');
+
+      // Connect to metamask
+      await provider.send('eth_requestAccounts', [])
       .then(response => {
         setCurrentAddress(response);
         setConnected(true);
       })
-      .catch(() => console.log('user rejected request'));
+      .catch(() => alert('User rejected connection to Metamask'));
+
+    } else {
+      alert(`Already connected with wallet: ${response}`);
+    }
   };
 
-  const checkConnectionWallet = () => {
-    provider.send('eth_accounts', []).then(response => {
+  const checkConnectionWallet = async () => {
+    await provider.send('eth_accounts', []).then(response => {
       if (response.length > 0) {
         setCurrentAddress(response);
         setConnected(true);
