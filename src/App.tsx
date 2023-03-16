@@ -36,7 +36,7 @@ export default function App() {
   const [currentSession, setCurrentSession] = useState('');
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
-  const disclaimerText = 'Select only one wallet if you have multiple accounts on your metamask widget. To use a different wallet please disconnect the current one from Metamask widget and click on Connect to choose a different one.';
+  const disclaimerText = 'Select only one wallet if you have multiple wallets on your metamask widget. To use a different wallet please disconnect the current one from Metamask widget and click on Connect to choose a different one.';
   const disclaimerMessageText = 'Copy the object below and use it on Postman or any similar tool to login on the selected URL or click on the login button.';
   const disclaimerLogin = 'Do no attempt to login more than once with the same SIWE message (nonce will be in use) - generate a new message then login';
 
