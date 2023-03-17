@@ -141,8 +141,9 @@ export default function Home() {
     // reset message and close modal
     setOpenModal(false);
 
+    const walletAddress = await signer.getAddress();
     const message = createSiweMessage(
-      await signer.getAddress(),
+      walletAddress,
       'Sign in with Ethereum',
       url,
       Number(chainId),
