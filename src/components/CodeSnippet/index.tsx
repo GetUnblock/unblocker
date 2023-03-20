@@ -13,7 +13,10 @@ export default function CodeSnippet(props: any) {
   return (
     <S.Container>
       <S.SnippetContainer>
-        <SyntaxHighlighter language="json" style={dark}>
+        <SyntaxHighlighter
+          language={props.language}
+          style={dark}
+        >
           {props.code}
         </SyntaxHighlighter>
       </S.SnippetContainer>
