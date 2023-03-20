@@ -12,13 +12,12 @@ import * as S from './style';
 export default function ImageEncoder() {
   const [file, setFile] = useState(null as any);
   const [base64Img, setBase64Img] = useState('');
+  const fileSize = 5000000;
 
-  const onDrop = useCallback((acceptedFile: any) => {
+  const onDropFile = useCallback((acceptedFile: any) => {
     setFile(null);
     setBase64Img('');
     const file = acceptedFile[0];
-
-    console.log(acceptedFile);
 
     if (file) {
       const reader = new FileReader();
@@ -33,7 +32,6 @@ export default function ImageEncoder() {
     } else {
       alert('Please upload a valid image with format: .png or .jpg or .jpeg');
     }
-
   }, []);
 
   return (
@@ -43,39 +41,38 @@ export default function ImageEncoder() {
           Upload and encode an image
         </Typography>
       </Box>
-      <Box
-        sx={{ my: 2 }}
-      >
-        <Typography variant="body1">
-          Upload your image:
-        </Typography>
+      <Box sx={{ my: 4 }}>
+        <Dropzone
+          multiple={false}
+          onDrop={onDropFile}
+          accept={{ 'image/*': ['.jpeg', '.jpg', '.png'] }}
+          maxSize={fileSize}
+        >
+          {({ getRootProps, getInputProps }) => (
+            <section>
+              <S.Container {...getRootProps()}>
+                <input {...getInputProps()} />
+                <S.Title>Drag and drop or click to upload an image</S.Title>
+                <S.FileTypeSizeText>Allowed formats: PNG, JPEG - Max size: 5MB</S.FileTypeSizeText>
+              </S.Container>
+            </section>
+          )}
+        </Dropzone>
       </Box>
-      <Dropzone
-        multiple={false}
-        onDrop={onDrop}
-        accept={{ 'image/*': ['.jpeg', '.jpg', '.png'] }}
-      >
-        {({ getRootProps, getInputProps }) => (
-          <section>
-            <S.Container {...getRootProps()}>
-              <input {...getInputProps()} />
-              <S.Description>Drag and drop or click to upload an image</S.Description>
-            </S.Container>
-          </section>
-        )}
-      </Dropzone>
-      {file ?
-        <Typography variant="body1">
-          {`Uploaded file:  ${file.name}`}
-        </Typography>
-        :
-        <Typography variant="body1">
-          No file uploaded yet
-        </Typography>
-      }
+      <Box sx={{ my: 2 }}>
+        {file ?
+          <Typography variant="body1">
+            {`Uploaded file:  ${file.name}`}
+          </Typography>
+          :
+          <Typography variant="body1">
+            No file uploaded yet
+          </Typography>
+        }
+      </Box>
       {base64Img &&
         <Box sx={{ my: 4 }}>
-          <Typography component='div'>
+          <Typography variant='body1'>
             Copy the content below and use it on the endpoints with required base64 image strings
           </Typography>
           <CodeSnippet code={base64Img} language={"text"} />
