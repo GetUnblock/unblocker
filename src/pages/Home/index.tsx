@@ -34,7 +34,7 @@ export default function Home() {
   const signer = provider.getSigner();
   const disclaimerText = 'Select only one wallet if you have multiple wallets on your metamask widget. To use a different wallet please disconnect the current one from Metamask widget and click on Connect to choose a different one.';
   const disclaimerMessageText = 'Copy the object below and use it on Postman or any similar tool to login on the selected URL or click on the login button.';
-  const disclaimerLogin = 'Do no attempt to login more than once with the same SIWE message (nonce will be in use) - generate a new message then login';
+  const disclaimerLogin = 'Do no attempt to login more than once with the same SIWE message (nonce will be in use) - generate a new message then login.';
 
   useEffect(() => {
     // Check if account is still connected via metamask every 1m
@@ -244,7 +244,7 @@ export default function Home() {
                 {`${url}/auth/login`}
               </Box>
             </Typography>
-            <CodeSnippet code={currentMsg} />
+            <CodeSnippet code={currentMsg} language={"json"} />
             <Button
               onClick={handleLoginModal}
               variant="contained"
@@ -265,7 +265,7 @@ export default function Home() {
               </Box>
               &nbsp;header field:
             </Typography>
-            <CodeSnippet code={currentSession} />
+            <CodeSnippet code={currentSession} language={"json"}/>
           </Box>
         }
         <ModalDialog
