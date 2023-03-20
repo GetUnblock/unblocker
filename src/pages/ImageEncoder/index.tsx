@@ -7,6 +7,8 @@ import {
 import CodeSnippet from '../../components/CodeSnippet';
 import Dropzone from 'react-dropzone';
 
+import * as S from './style';
+
 export default function ImageEncoder() {
   const [file, setFile] = useState(null as any);
   const [base64Img, setBase64Img] = useState('');
@@ -55,10 +57,10 @@ export default function ImageEncoder() {
       >
         {({ getRootProps, getInputProps }) => (
           <section>
-            <div {...getRootProps({ style: { borderStyle: 'dotted', borderWidth: 1, borderRadius: 1, maxWidth: '50%', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '10px' } })}>
+            <S.Container {...getRootProps()}>
               <input {...getInputProps()} />
-              <p>Drag and drop or click to upload an image</p>
-            </div>
+              <S.Description>Drag and drop or click to upload an image</S.Description>
+            </S.Container>
           </section>
         )}
       </Dropzone>
