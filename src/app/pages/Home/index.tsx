@@ -80,9 +80,6 @@ export default function Home() {
   };
 
   const handleConnectWallet = async () => {
-    // Refresh page before checking connection
-    window.location.reload();
-
     // Check if connection still exists
     const response = await provider.send('eth_accounts', []);
     if (response.length === 0) {
