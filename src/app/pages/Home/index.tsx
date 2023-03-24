@@ -80,6 +80,9 @@ export default function Home() {
   };
 
   const handleConnectWallet = async () => {
+    // Refresh page before checking connection
+    window.location.reload();
+
     // Check if connection still exists
     const response = await provider.send('eth_accounts', []);
     if (response.length === 0) {
@@ -185,7 +188,8 @@ export default function Home() {
     if (url && apiKey) {
       await axios.post(`${url}/auth/login`, loginBody, config)
         .then(res => {
-          setCurrentSession(res.data.unblock_session_id);
+          const {user_id, unblock_session_id } = res.data;
+          setCurrentSession(JSON.stringify({ user_id, unblock_session_id }, null, 2));
           setLoading(false);
         })
         .catch(error => {
@@ -259,11 +263,11 @@ export default function Home() {
           <Box sx={{ my: 4 }}>
             <InfoDisclaimer text={disclaimerLogin} />
             <Typography component='div'>
-              Copy the Session ID below to use on any endpoint that requires&nbsp;
+              Copy the User Id and Session Id below to use on any endpoint that requires&nbsp;
               <Box component="span" fontWeight='bold'>
-                unblock-session-id
+                unblock-session-id & user_id
               </Box>
-              &nbsp;header field:
+              &nbsp;fields:
             </Typography>
             <CodeSnippet code={currentSession} language={"json"}/>
           </Box>

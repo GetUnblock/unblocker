@@ -1,5 +1,5 @@
 import { Container, Box, Button, Typography } from '@mui/material';
-import InfoDisclaimer from './components/InfoDisclaimer';
+import InfoDisclaimer from './app/components/InfoDisclaimer';
 
 export default function NotFound() {
   const disclaimerNotFound = 'Metamask was not detected! Please install it then click on reload button'; 
