@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import ImageEncoder from './pages/ImageEncoder';
-import MainLayout from './layout/MainLayout';
+import Home from './app/pages/Home';
+import ImageEncoder from './app/pages/ImageEncoder';
+import MainLayout from './app/layout/MainLayout';
 
 export default function App() {
   return (
