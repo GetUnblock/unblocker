@@ -12,7 +12,7 @@ import * as S from './style';
 export default function ImageEncoder() {
   const [file, setFile] = useState(null as any);
   const [base64Img, setBase64Img] = useState('');
-  const fileSize = 5000000;
+  const fileSize = 500000;
 
   const onDropFile = useCallback((acceptedFile: any) => {
     setFile(null);
@@ -30,7 +30,7 @@ export default function ImageEncoder() {
       reader.readAsDataURL(file);
       setFile(file);
     } else {
-      alert('Please upload a valid image with format: .png or .jpg or .jpeg');
+      alert('Please upload a valid image with size of at most 500KB');
     }
   }, []);
 
@@ -53,7 +53,7 @@ export default function ImageEncoder() {
               <S.Container {...getRootProps()}>
                 <input {...getInputProps()} />
                 <S.Title>Drag and drop or click to upload an image</S.Title>
-                <S.FileTypeSizeText>Allowed formats: PNG, JPEG - Max size: 5MB</S.FileTypeSizeText>
+                <S.FileTypeSizeText>Allowed formats: PNG, JPEG - Max size: 500Kb</S.FileTypeSizeText>
               </S.Container>
             </section>
           )}
