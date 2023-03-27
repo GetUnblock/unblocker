@@ -155,7 +155,8 @@ export default function Home() {
     if (currentProvider) {
       await currentProvider.send('eth_accounts', []).then((response: any) => {
         if (response.length > 0) {
-          setCurrentAddress(response);
+          const address = web3.utils.toChecksumAddress(response[0]);
+          setCurrentAddress(address);
           setConnected(true);
         } else {
           setCurrentAddress('');
