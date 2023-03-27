@@ -1,5 +1,5 @@
 {
-  "name": "siwe-local",
+  "name": "unblocker",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -38,7 +38,7 @@
   },
   "scripts": {
     "start": "yarn run build && (cd server && yarn start)",
-    "start-react-scripts": "react-scripts start",
+    "start-react-scripts": "GENERATE_SOURCEMAP=false react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
