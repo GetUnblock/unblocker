@@ -30,7 +30,7 @@ export default function ImageEncoder() {
       reader.readAsDataURL(file);
       setFile(file);
     } else {
-      alert('Please upload a valid image with format: .png or .jpg or .jpeg');
+      alert('Please upload a valid image with size of at most 500KB');
     }
   }, []);
 
