@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { ethers } from 'ethers';
 import { generateNonce, SiweMessage } from 'siwe';
+import web3 from 'web3';
 import CodeSnippet from '../../components/CodeSnippet';
 import InfoDisclaimer from '../../components/InfoDisclaimer';
 import ModalDialog from '../../components/ModalDialog';
@@ -92,7 +93,8 @@ export default function Home() {
       // Connect to metamask
       await provider.send('eth_requestAccounts', [])
         .then(response => {
-          setCurrentAddress(response);
+          const address = web3.utils.toChecksumAddress(response[0]);
+          setCurrentAddress(address);
           setConnected(true);
         })
         .catch(() => alert('User rejected connection to Metamask'));
@@ -105,7 +107,8 @@ export default function Home() {
   const checkConnectionWallet = async () => {
     await provider.send('eth_accounts', []).then(response => {
       if (response.length > 0) {
-        setCurrentAddress(response);
+        const address = web3.utils.toChecksumAddress(response[0]);
+        setCurrentAddress(address);
         setConnected(true);
       } else {
         setCurrentAddress('');
