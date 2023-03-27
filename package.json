@@ -39,7 +39,7 @@
   "scripts": {
     "start": "yarn run build && (cd server && yarn start)",
     "start-react-scripts": "GENERATE_SOURCEMAP=false react-scripts start",
-    "build": "react-scripts build",
+    "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
