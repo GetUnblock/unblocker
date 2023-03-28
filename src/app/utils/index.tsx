@@ -81,6 +81,6 @@ export const appMetadata = {
 
 // Disclaimer's text values
 
-export const disclaimerText = 'Select only one wallet if you have multiple wallets on your metamask widget. To use a different wallet please disconnect the current one from Metamask widget and click on Connect to choose a different one.';
+export const disclaimerText = 'Select only one wallet if you have multiple wallets. To use a different wallet please disconnect the current one from Metamask or WalletConnect and click on Connect to choose a different one.';
 export const disclaimerMessageText = 'Copy the object below and use it on Postman or any similar tool to login on the selected URL or click on the login button.';
 export const disclaimerLogin = 'Do no attempt to login more than once with the same SIWE message (nonce will be in use) - generate a new message then login.';
