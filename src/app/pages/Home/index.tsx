@@ -81,7 +81,7 @@ export default function Home() {
     // Check if account is still connected
     const intervalId = setInterval(() => {
       checkConnectionWallet();
-    }, 30000)
+    }, 60000)
 
     return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -91,7 +91,7 @@ export default function Home() {
     // Check if account is connected
     checkConnectionWallet();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentProvider]);
 
   const handleModalOpen = () => {
     setCurrentMsg('');
@@ -123,16 +123,50 @@ export default function Home() {
   const handleConnectWallet = async () => {
     // Check if connection still exists
     let currentWallet = [];
-    if (currentProvider) {
-      currentWallet = await currentProvider.send('eth_accounts', []);
-    }
 
-    if (currentWallet.length === 0) {
-      // reset all state variables
+    try {
+      if (currentProvider) {
+        currentWallet = await currentProvider.send('eth_accounts', []);
+      }
+
+      if (currentWallet.length === 0) {
+        // reset all state variables
+        setCurrentAddress('');
+        setConnected(false);
+        setCurrentMsg('');
+        setCurrentSession('');
+
+        // Check if a connection exists and reset state before connecting again
+        const [primaryWallet] = onboard.state.get().wallets;
+        if (primaryWallet) { 
+          console.log('Resetting onboard wallet state');
+          await onboard.disconnectWallet({ label: primaryWallet.label });
+        }
+
+        const wallets = await onboard.connectWallet();
+
+        if (wallets[0]) {
+          setCurrentProvider(new ethers.providers.Web3Provider(
+            wallets[0].provider,
+            'any',
+          ));
+
+          const address = web3.utils.toChecksumAddress(wallets[0].accounts[0].address);
+          setCurrentAddress(address);
+          setConnected(true);
+        }
+
+      } else {
+        alert(`Already connected with wallet: ${currentAddress}`);
+      }
+
+    } catch (error) {
+      // reset all state variables and connect to wallet again
       setCurrentAddress('');
       setConnected(false);
       setCurrentMsg('');
       setCurrentSession('');
+      setCurrentProvider(null);
 
       const wallets = await onboard.connectWallet();
 
@@ -146,25 +180,32 @@ export default function Home() {
         setCurrentAddress(address);
         setConnected(true);
       }
-    } else {
-      alert(`Already connected with wallet: ${currentAddress}`);
     }
   };
 
   const checkConnectionWallet = async () => {
-    if (currentProvider) {
-      await currentProvider.send('eth_accounts', []).then((response: any) => {
-        if (response.length > 0) {
-          const address = web3.utils.toChecksumAddress(response[0]);
-          setCurrentAddress(address);
-          setConnected(true);
-        } else {
-          setCurrentAddress('');
-          setConnected(false);
-          setCurrentMsg('');
-          setCurrentSession('');
-        }
-      });
+    try {
+      if (currentProvider) {
+        await currentProvider.send('eth_accounts', []).then((response: any) => {
+          if (response.length > 0) {
+            const address = web3.utils.toChecksumAddress(response[0]);
+            setCurrentAddress(address);
+            setConnected(true);
+          } else {
+            setCurrentAddress('');
+            setConnected(false);
+            setCurrentMsg('');
+            setCurrentSession('');
+            setCurrentProvider(null);
+          }
+        });
+      }
+    } catch (error) {
+      setCurrentAddress('');
+      setConnected(false);
+      setCurrentMsg('');
+      setCurrentSession('');
+      setCurrentProvider(null);
     }
   };
 
