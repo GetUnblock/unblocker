@@ -11,15 +11,59 @@ import {
 } from '@mui/material';
 import { ethers } from 'ethers';
 import { generateNonce, SiweMessage } from 'siwe';
+import Onboard from '@web3-onboard/core';
+import injectedModule from '@web3-onboard/injected-wallets';
+import walletConnectModule from '@web3-onboard/walletconnect';
 import web3 from 'web3';
 import CodeSnippet from '../../components/CodeSnippet';
 import InfoDisclaimer from '../../components/InfoDisclaimer';
 import ModalDialog from '../../components/ModalDialog';
-import { CHAIN_LIST } from '../../utils';
+import {
+  CHAIN_LIST,
+  chains,
+  appMetadata,
+  disclaimerText,
+  disclaimerMessageText,
+  disclaimerLogin
+} from '../../utils';
 import ModalLoginDialog from '../../components/ModalLoginDialog';
 
-export default function Home() {
+// Onboard setup
+const injected = injectedModule();
+const walletConnect = walletConnectModule({
+  qrcodeModalOptions: {
+    mobileLinks: [
+      'rainbow',
+      'metamask',
+      'argent',
+      'trust',
+      'imtoken',
+      'pillar',
+    ],
+  },
+});
 
+const onboard = Onboard({
+  wallets: [],
+  chains,
+  appMetadata,
+  accountCenter: {
+    desktop: {
+      enabled: false,
+    },
+    mobile: {
+      enabled: false,
+    },
+  },
+});
+
+onboard.state.actions.setWalletModules([
+  injected,
+  walletConnect,
+]);
+
+
+export default function Home() {
   const [connected, setConnected] = useState(false);
   const [currentAddress, setCurrentAddress] = useState('');
   const [currentMsg, setCurrentMsg] = useState('');
@@ -31,27 +75,23 @@ export default function Home() {
   const [chainDescription, setChainDescription] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [currentSession, setCurrentSession] = useState('');
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const signer = provider.getSigner();
-  const disclaimerText = 'Select only one wallet if you have multiple wallets on your metamask widget. To use a different wallet please disconnect the current one from Metamask widget and click on Connect to choose a different one.';
-  const disclaimerMessageText = 'Copy the object below and use it on Postman or any similar tool to login on the selected URL or click on the login button.';
-  const disclaimerLogin = 'Do no attempt to login more than once with the same SIWE message (nonce will be in use) - generate a new message then login.';
+  const [currentProvider, setCurrentProvider] = useState(null as any);
 
   useEffect(() => {
-    // Check if account is still connected via metamask every 1m
+    // Check if account is still connected
     const intervalId = setInterval(() => {
       checkConnectionWallet();
     }, 60000)
 
     return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentProvider]);
 
   useEffect(() => {
     // Check if account is connected
     checkConnectionWallet();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentProvider]);
 
   const handleModalOpen = () => {
     setCurrentMsg('');
@@ -82,41 +122,90 @@ export default function Home() {
 
   const handleConnectWallet = async () => {
     // Check if connection still exists
-    const response = await provider.send('eth_accounts', []);
-    if (response.length === 0) {
-      // reset all state variables
-      setCurrentAddress('');
-      setConnected(false);
-      setCurrentMsg('');
-      setCurrentSession('');
+    let currentWallet = [];
 
-      // Connect to metamask
-      await provider.send('eth_requestAccounts', [])
-        .then(response => {
-          const address = web3.utils.toChecksumAddress(response[0]);
-          setCurrentAddress(address);
-          setConnected(true);
-        })
-        .catch(() => alert('User rejected connection to Metamask'));
+    try {
+      if (currentProvider) {
+        currentWallet = await currentProvider.send('eth_accounts', []);
+      }
 
-    } else {
-      alert(`Already connected with wallet: ${response}`);
-    }
-  };
-
-  const checkConnectionWallet = async () => {
-    await provider.send('eth_accounts', []).then(response => {
-      if (response.length > 0) {
-        const address = web3.utils.toChecksumAddress(response[0]);
-        setCurrentAddress(address);
-        setConnected(true);
-      } else {
+      if (currentWallet.length === 0) {
+        // reset all state variables
         setCurrentAddress('');
         setConnected(false);
         setCurrentMsg('');
         setCurrentSession('');
+
+        // Check if a connection exists and reset state before connecting again
+        const [primaryWallet] = onboard.state.get().wallets;
+        if (primaryWallet) { 
+          await onboard.disconnectWallet({ label: primaryWallet.label });
+        }
+
+        const wallets = await onboard.connectWallet();
+
+        if (wallets[0]) {
+          setCurrentProvider(new ethers.providers.Web3Provider(
+            wallets[0].provider,
+            'any',
+          ));
+
+          const address = web3.utils.toChecksumAddress(wallets[0].accounts[0].address);
+          setCurrentAddress(address);
+          setConnected(true);
+        }
+
+      } else {
+        alert(`Already connected with wallet: ${currentAddress}`);
       }
-    })
+
+    } catch (error) {
+      // reset all state variables and connect to wallet again
+      setCurrentAddress('');
+      setConnected(false);
+      setCurrentMsg('');
+      setCurrentSession('');
+      setCurrentProvider(null);
+
+      const wallets = await onboard.connectWallet();
+
+      if (wallets[0]) {
+        setCurrentProvider(new ethers.providers.Web3Provider(
+          wallets[0].provider,
+          'any',
+        ));
+
+        const address = web3.utils.toChecksumAddress(wallets[0].accounts[0].address);
+        setCurrentAddress(address);
+        setConnected(true);
+      }
+    }
+  };
+
+  const checkConnectionWallet = async () => {
+    try {
+      if (currentProvider) {
+        await currentProvider.send('eth_accounts', []).then((response: any) => {
+          if (response.length > 0) {
+            const address = web3.utils.toChecksumAddress(response[0]);
+            setCurrentAddress(address);
+            setConnected(true);
+          } else {
+            setCurrentAddress('');
+            setConnected(false);
+            setCurrentMsg('');
+            setCurrentSession('');
+            setCurrentProvider(null);
+          }
+        });
+      }
+    } catch (error) {
+      setCurrentAddress('');
+      setConnected(false);
+      setCurrentMsg('');
+      setCurrentSession('');
+      setCurrentProvider(null);
+    }
   };
 
   const createSiweMessage = (address: string, statement: string, domain: string, chainId: number) => {
@@ -137,13 +226,14 @@ export default function Home() {
   }
 
   const signInWithEthereum = async () => {
-    if (!connected) {
+    if (!connected && !currentProvider) {
       alert('Please connect to your wallet');
       return;
     }
     // reset message and close modal
     setOpenModal(false);
 
+    const signer = currentProvider.getSigner();
     const walletAddress = await signer.getAddress();
     const message = createSiweMessage(
       walletAddress,
@@ -188,7 +278,7 @@ export default function Home() {
     if (url && apiKey) {
       await axios.post(`${url}/auth/login`, loginBody, config)
         .then(res => {
-          const {user_id, unblock_session_id } = res.data;
+          const { user_id, unblock_session_id } = res.data;
           setCurrentSession(JSON.stringify({ user_id, unblock_session_id }, null, 2));
           setLoading(false);
         })
@@ -269,7 +359,7 @@ export default function Home() {
               </Box>
               &nbsp;fields:
             </Typography>
-            <CodeSnippet code={currentSession} language={"json"}/>
+            <CodeSnippet code={currentSession} language={"json"} />
           </Box>
         }
         <ModalDialog
