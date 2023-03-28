@@ -139,7 +139,6 @@ export default function Home() {
         // Check if a connection exists and reset state before connecting again
         const [primaryWallet] = onboard.state.get().wallets;
         if (primaryWallet) { 
-          console.log('Resetting onboard wallet state');
           await onboard.disconnectWallet({ label: primaryWallet.label });
         }
 
