@@ -11,6 +11,17 @@ import {
 } from '@mui/material/';
 
 export default function ModalLoginDialog(props: any) {
+  const errorApiKey = 'API key must start with: API-Key <token>';
+
+  const handleDisabled = () => {
+    if (props.hasError) {
+      return true;
+    } else if (props.apiKey.trim().length === 0) {
+      return true;
+    } else {
+      return false;
+    }
+  };
 
   return (
     <div>
@@ -23,6 +34,8 @@ export default function ModalLoginDialog(props: any) {
           <Box>
             <TextField
               sx={{ width: "75%", marginBottom: "20px" }}
+              error={props.hasError}
+              helperText={props.hasError ? errorApiKey : ''}
               variant="outlined"
               onChange={props.onChange}
               label="API Key"
@@ -53,7 +66,7 @@ export default function ModalLoginDialog(props: any) {
             variant="contained"
             sx={{ backgroundColor: '#2A73FF' }}
             onClick={props.onSubmit}
-            disabled={!props.apiKey}
+            disabled={handleDisabled()}
           >
             Login
           </Button>

@@ -74,6 +74,7 @@ export default function Home() {
   const [chainId, setChainId] = useState('');
   const [chainDescription, setChainDescription] = useState('');
   const [apiKey, setApiKey] = useState('');
+  const [apiKeyHasError, setApiKeyHasError] = useState(false);  
   const [currentSession, setCurrentSession] = useState('');
   const [currentProvider, setCurrentProvider] = useState(null as any);
 
@@ -92,6 +93,14 @@ export default function Home() {
     checkConnectionWallet();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentProvider]);
+
+  useEffect(() => {
+    if (!apiKey.startsWith('API-Key ') && apiKey.length > 0) {
+      setApiKeyHasError(true);
+    } else {
+      setApiKeyHasError(false);
+    }
+  }, [apiKey, apiKeyHasError])
 
   const handleModalOpen = () => {
     setCurrentMsg('');
@@ -284,8 +293,10 @@ export default function Home() {
         })
         .catch(error => {
           setLoading(false);
-          alert('Failed to login with error: ' + error +
-            '\n Please try again or ensure you are not trying to login with the same SIWE message');
+          const errorId = error.response?.data?.error_id;
+          const errorMessage = error.response?.data?.message;
+          const errorCode = error.response?.status;
+          alert(`Login failed with errorCode: ${errorCode}, error_id: ${errorId} and the following message: ${errorMessage}`);
         });
     }
     setApiKey('');
@@ -374,6 +385,7 @@ export default function Home() {
         <ModalLoginDialog
           open={openLoginModal}
           onClose={handleLoginCloseModal}
+          hasError={apiKeyHasError}
           url={url}
           apiKey={apiKey}
           onChange={handleApiChange}
