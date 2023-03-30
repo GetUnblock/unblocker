@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
   Container,
@@ -75,9 +75,10 @@ export default function Home() {
   const [chainId, setChainId] = useState('');
   const [chainDescription, setChainDescription] = useState('');
   const [apiKey, setApiKey] = useState('');
-  const [apiKeyHasError, setApiKeyHasError] = useState(false);  
+  const [apiKeyHasError, setApiKeyHasError] = useState(false);
   const [currentSession, setCurrentSession] = useState('');
   const [currentProvider, setCurrentProvider] = useState(null as any);
+  const loginCodeSnippet = useRef<HTMLDivElement>(null);;
 
   useEffect(() => {
     // Check if account is still connected
@@ -101,7 +102,14 @@ export default function Home() {
     } else {
       setApiKeyHasError(false);
     }
-  }, [apiKey, apiKeyHasError])
+  }, [apiKey, apiKeyHasError]);
+
+  useEffect(() => {
+    // Scroll to login snippet
+    if (loginCodeSnippet.current) {
+      loginCodeSnippet.current.scrollIntoView();
+    }
+  }, [currentSession]);
 
   const handleModalOpen = () => {
     setCurrentMsg('');
@@ -148,7 +156,7 @@ export default function Home() {
 
         // Check if a connection exists and reset state before connecting again
         const [primaryWallet] = onboard.state.get().wallets;
-        if (primaryWallet) { 
+        if (primaryWallet) {
           await onboard.disconnectWallet({ label: primaryWallet.label });
         }
 
@@ -343,7 +351,7 @@ export default function Home() {
           </Button>
         </Box>
         {currentMsg &&
-          <>
+          <Box sx={{ my: 4 }}>
             <InfoDisclaimer text={disclaimerMessageText} />
             <Typography variant="body1" gutterBottom>
               Login endpoint:&nbsp;
@@ -360,12 +368,12 @@ export default function Home() {
             >
               Login
             </Button>
-          </>
+          </Box>
         }
         {currentSession &&
           <Box sx={{ my: 4 }}>
             <InfoDisclaimer text={disclaimerLogin} />
-            <Typography component='div'>
+            <Typography component='div' ref={loginCodeSnippet}>
               Copy the User Id and Session Id below to use on any endpoint that requires&nbsp;
               <Box component="span" fontWeight='bold'>
                 unblock-session-id & user_id
