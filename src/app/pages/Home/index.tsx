@@ -293,8 +293,8 @@ export default function Home() {
         })
         .catch(error => {
           setLoading(false);
-          const errorId = error.response?.data?.error_id;
-          const errorMessage = error.response?.data?.message;
+          const errorId = error.response?.data?.error_id || '';
+          const errorMessage = error.response?.data?.message || '';
           const errorCode = error.response?.status;
           alert(`Login failed with errorCode: ${errorCode}, error_id: ${errorId} and the following message: ${errorMessage}`);
         });
