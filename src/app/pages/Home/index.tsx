@@ -23,6 +23,7 @@ import {
   chains,
   appMetadata,
   disclaimerText,
+  disclaimerGenerateMessageText,
   disclaimerMessageText,
   disclaimerLogin
 } from '../../utils';
@@ -331,6 +332,7 @@ export default function Home() {
           }
         </Box>
         <Box sx={{ my: 4 }}>
+          <InfoDisclaimer text={disclaimerGenerateMessageText} />
           <Button
             onClick={handleModalOpen}
             variant="contained"
