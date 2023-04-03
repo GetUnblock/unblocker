@@ -37,7 +37,7 @@
     "web3": "^1.9.0"
   },
   "scripts": {
-    "start": "yarn build && (cd server && yarn start)",
+    "start": "yarn start-react-scripts",
     "build": "react-scripts --openssl-legacy-provider build",
     "start-react-scripts": "GENERATE_SOURCEMAP=false react-scripts start"
   },
