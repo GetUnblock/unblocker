@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
   Container,
@@ -23,6 +23,7 @@ import {
   chains,
   appMetadata,
   disclaimerText,
+  disclaimerGenerateMessageText,
   disclaimerMessageText,
   disclaimerLogin
 } from '../../utils';
@@ -74,8 +75,10 @@ export default function Home() {
   const [chainId, setChainId] = useState('');
   const [chainDescription, setChainDescription] = useState('');
   const [apiKey, setApiKey] = useState('');
+  const [apiKeyHasError, setApiKeyHasError] = useState(false);
   const [currentSession, setCurrentSession] = useState('');
   const [currentProvider, setCurrentProvider] = useState(null as any);
+  const loginCodeSnippet = useRef<HTMLDivElement>(null);;
 
   useEffect(() => {
     // Check if account is still connected
@@ -92,6 +95,21 @@ export default function Home() {
     checkConnectionWallet();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentProvider]);
+
+  useEffect(() => {
+    if (!apiKey.startsWith('API-Key ') && apiKey.length > 0) {
+      setApiKeyHasError(true);
+    } else {
+      setApiKeyHasError(false);
+    }
+  }, [apiKey, apiKeyHasError]);
+
+  useEffect(() => {
+    // Scroll to login snippet
+    if (loginCodeSnippet.current) {
+      loginCodeSnippet.current.scrollIntoView();
+    }
+  }, [currentSession]);
 
   const handleModalOpen = () => {
     setCurrentMsg('');
@@ -138,7 +156,7 @@ export default function Home() {
 
         // Check if a connection exists and reset state before connecting again
         const [primaryWallet] = onboard.state.get().wallets;
-        if (primaryWallet) { 
+        if (primaryWallet) {
           await onboard.disconnectWallet({ label: primaryWallet.label });
         }
 
@@ -284,8 +302,10 @@ export default function Home() {
         })
         .catch(error => {
           setLoading(false);
-          alert('Failed to login with error: ' + error +
-            '\n Please try again or ensure you are not trying to login with the same SIWE message');
+          const errorId = error.response?.data?.error_id || '';
+          const errorMessage = error.response?.data?.message || '';
+          const errorCode = error.response?.status;
+          alert(`Login failed with errorCode: ${errorCode}, error_id: ${errorId} and the following message: ${errorMessage}`);
         });
     }
     setApiKey('');
@@ -320,6 +340,7 @@ export default function Home() {
           }
         </Box>
         <Box sx={{ my: 4 }}>
+          <InfoDisclaimer text={disclaimerGenerateMessageText} />
           <Button
             onClick={handleModalOpen}
             variant="contained"
@@ -330,7 +351,7 @@ export default function Home() {
           </Button>
         </Box>
         {currentMsg &&
-          <>
+          <Box sx={{ my: 4 }}>
             <InfoDisclaimer text={disclaimerMessageText} />
             <Typography variant="body1" gutterBottom>
               Login endpoint:&nbsp;
@@ -347,12 +368,12 @@ export default function Home() {
             >
               Login
             </Button>
-          </>
+          </Box>
         }
         {currentSession &&
           <Box sx={{ my: 4 }}>
             <InfoDisclaimer text={disclaimerLogin} />
-            <Typography component='div'>
+            <Typography component='div' ref={loginCodeSnippet}>
               Copy the User Id and Session Id below to use on any endpoint that requires&nbsp;
               <Box component="span" fontWeight='bold'>
                 unblock-session-id & user_id
@@ -374,6 +395,7 @@ export default function Home() {
         <ModalLoginDialog
           open={openLoginModal}
           onClose={handleLoginCloseModal}
+          hasError={apiKeyHasError}
           url={url}
           apiKey={apiKey}
           onChange={handleApiChange}
