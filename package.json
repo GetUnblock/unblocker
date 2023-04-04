@@ -37,9 +37,9 @@
     "web3": "^1.9.0"
   },
   "scripts": {
-    "start": "yarn start-react-scripts",
-    "build": "react-scripts --openssl-legacy-provider build",
-    "start-react-scripts": "GENERATE_SOURCEMAP=false react-scripts start"
+    "start": "npm run --max_old_space_size=1048 start-react-scripts",
+    "build": "react-scripts build",
+    "start-react-scripts": "react-scripts start"
   },
   "eslintConfig": {
     "extends": [
