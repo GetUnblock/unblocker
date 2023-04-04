@@ -37,8 +37,8 @@
     "web3": "^1.9.0"
   },
   "scripts": {
-    "start": "npm run --max_old_space_size=948 start-react-scripts",
-    "build": "react-scripts build",
+    "start": "npm --optimize_for_size --max_old_space_size=460 start-react-scripts",
+    "build": "node react-scripts build",
     "start-react-scripts": "react-scripts start"
   },
   "eslintConfig": {
