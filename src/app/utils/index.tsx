@@ -70,13 +70,13 @@ export const chains = [
     id: 10,
     token: 'ETH',
     label: 'Optimism Mainnet',
-    rpcUrl: 'https://opt-goerli.g.alchemy.com/v2/0e6C_CySHER9ke8kuy_riHhxG3CSnaS3'
+    rpcUrl: 'https://optimism-mainnet.infura.io'
   },
   {
     id: 420,
     token: 'ETH',
     label: 'Optimism Goerli Testnet',
-    rpcUrl: 'https://opt-mainnet.g.alchemy.com/v2/agc_8AHiZa4_H7NThzzbhvZQO5_bPyLh'
+    rpcUrl: 'https://goerli.optimism.io/'
   },
   {
     id: 42220,
