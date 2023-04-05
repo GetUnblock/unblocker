@@ -22,7 +22,7 @@ export const URL_LIST = [
 export const CHAIN_LIST = [
   {
     id: "137",
-    description: "Polygon Mainet",
+    description: "Polygon Mainnet",
     url: "https://api.getunblock.com",
   },
   {
@@ -31,8 +31,18 @@ export const CHAIN_LIST = [
     url: "https://sandbox.getunblock.com",
   },
   {
+    id: "10",
+    description: "Optimism Mainnet",
+    url: "https://api.getunblock.com",
+  },
+  {
+    id: "420",
+    description: "Optimism Testnet",
+    url: "https://sandbox.getunblock.com",
+  },
+  {
     id: "42220",
-    description: "Celo Mainet",
+    description: "Celo Mainnet",
     url: "https://api.getunblock.com/fiat-connect",
   },
   {
@@ -55,6 +65,18 @@ export const chains = [
     token: 'MATIC',
     label: 'Polygon Mumbai',
     rpcUrl: 'https://rpc-mumbai.maticvigil.com/',
+  },
+  {
+    id: 10,
+    token: 'ETH',
+    label: 'Optimism Mainnet',
+    rpcUrl: 'https://opt-goerli.g.alchemy.com/v2/0e6C_CySHER9ke8kuy_riHhxG3CSnaS3'
+  },
+  {
+    id: 420,
+    token: 'ETH',
+    label: 'Optimism Goerli Testnet',
+    rpcUrl: 'https://opt-mainnet.g.alchemy.com/v2/agc_8AHiZa4_H7NThzzbhvZQO5_bPyLh'
   },
   {
     id: 42220,

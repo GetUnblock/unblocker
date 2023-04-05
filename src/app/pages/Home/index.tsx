@@ -72,8 +72,8 @@ export default function Home() {
   const [openLoginModal, setOpenLoginModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState('');
-  const [chainId, setChainId] = useState('');
-  const [chainDescription, setChainDescription] = useState('');
+  const [chainList, setChainList] = useState([] as any);
+  const [chainId, setChainId] = useState(null as any);
   const [apiKey, setApiKey] = useState('');
   const [apiKeyHasError, setApiKeyHasError] = useState(false);
   const [currentSession, setCurrentSession] = useState('');
@@ -114,7 +114,7 @@ export default function Home() {
   const handleModalOpen = () => {
     setCurrentMsg('');
     setUrl('');
-    setChainId('');
+    setChainList('');
     setCurrentSession('');
     setOpenModal(true);
   };
@@ -122,8 +122,7 @@ export default function Home() {
   const handleClose = () => {
     setOpenModal(false);
     setUrl('');
-    setChainId('');
-    setChainDescription('');
+    setChainList('');
   };
 
   const handleUrlChange = (event: SelectChangeEvent) => {
@@ -132,10 +131,16 @@ export default function Home() {
       return obj.url === event.target.value;
     });
 
-    // Set URL, Chain Id & Description
-    setUrl(event.target.value);
+    // Set URL, default Chain Id & Description
+    setChainList(chainResult);
     setChainId(chainResult[0].id);
-    setChainDescription(chainResult[0].description);
+    setUrl(event.target.value);
+  };
+
+  const handleChainChange = (event: SelectChangeEvent) => {
+
+    // Set Chain Id
+    setChainId(event.target.value);
   };
 
   const handleConnectWallet = async () => {
@@ -388,8 +393,9 @@ export default function Home() {
           onClose={handleClose}
           url={url}
           onUrlChange={handleUrlChange}
+          onChainChange={handleChainChange}
           chainId={chainId}
-          chainDescription={chainDescription}
+          chainList={chainList}
           onSubmit={signInWithEthereum}
         />
         <ModalLoginDialog

@@ -36,14 +36,20 @@ export default function ModalDialog(props: any) {
             </TextField>
           </Box>
           <Box>
-            {props.url &&
+            {props.url && props.chainList &&
               <TextField
                 sx={{ width: "50%" }}
                 variant="outlined"
-                value={`${props.chainId} - ${props.chainDescription}`}
+                onChange={props.onChainChange}
+                value={props.chainId}
+                disabled={props.chainList.length===1}
                 label="Chain Id"
-                disabled={true}
-              />
+                select
+              >
+                {props.chainList.map((item: any, index: number) => (
+                  <MenuItem key={index} value={item.id}>{item.description}</MenuItem>
+                ))}
+              </TextField>
             }
           </Box>
         </DialogContent>
