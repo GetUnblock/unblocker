@@ -73,7 +73,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState('');
   const [chainList, setChainList] = useState([] as any);
-  const [chainId, setChainId] = useState(null as any);
+  const [chainId, setChainId] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [apiKeyHasError, setApiKeyHasError] = useState(false);
   const [currentSession, setCurrentSession] = useState('');
