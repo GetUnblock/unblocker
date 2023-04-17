@@ -276,6 +276,8 @@ export default function Home() {
             setCurrentMsg('');
             setCurrentSession('');
             setCurrentProvider(null);
+            localStorage.removeItem("currentConnectedWallet");
+            localStorage.removeItem("connectedWallets");
           }
         });
       }
