@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import {
   Container,
@@ -65,6 +66,7 @@ onboard.state.actions.setWalletModules([
 
 
 export default function Home() {
+  let location = useLocation();
   const [connected, setConnected] = useState(false);
   const [currentAddress, setCurrentAddress] = useState('');
   const [currentMsg, setCurrentMsg] = useState('');
@@ -111,11 +113,52 @@ export default function Home() {
     }
   }, [currentSession]);
 
+  useEffect(() => {
+    const reconnectWallet = async () => {
+      // Reconnect to wallet
+      setLoading(true);
+      await handleConnectWallet({
+        autoSelect: { label: walletLabel, disableModals: true },
+      });
+      setLoading(false);
+    }
+
+    // check if there is a wallet saved on local storage
+    let walletLabel: string;
+    const previouslyConnectedWallets = JSON.parse(
+      sessionStorage.getItem('connectedWallets'),
+    );
+    if (previouslyConnectedWallets && !currentProvider) {
+      walletLabel = previouslyConnectedWallets[0];
+      // Attempt to reconnect to wallet
+      reconnectWallet();
+
+      const previousUrl = sessionStorage.getItem('lastUrl');
+      const previousSiweMessage = sessionStorage.getItem('lastSiweMsg');
+      // restore previous Siwe Generated message & session if exist on localStorage
+      if (previousUrl && previousSiweMessage) {
+        setUrl(previousUrl);
+        setCurrentMsg(previousSiweMessage);
+
+        const lastSession = sessionStorage.getItem('lastSession');
+        if (lastSession) {
+          setCurrentSession(lastSession);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location]);
+
   const handleModalOpen = () => {
     setCurrentMsg('');
     setUrl('');
     setChainList('');
     setCurrentSession('');
+
+    // remove from storage previous information
+    sessionStorage.removeItem('lastUrl');
+    sessionStorage.removeItem('lastSiweMsg');
+    sessionStorage.removeItem('lastSession');
     setOpenModal(true);
   };
 
@@ -135,6 +178,7 @@ export default function Home() {
     setChainList(chainResult);
     setChainId(chainResult[0].id);
     setUrl(event.target.value);
+    sessionStorage.setItem("lastUrl", event.target.value);
   };
 
   const handleChainChange = (event: SelectChangeEvent) => {
@@ -143,7 +187,7 @@ export default function Home() {
     setChainId(event.target.value);
   };
 
-  const handleConnectWallet = async () => {
+  const handleConnectWallet = async (connectOptions?: any) => {
     // Check if connection still exists
     let currentWallet = [];
 
@@ -165,7 +209,7 @@ export default function Home() {
           await onboard.disconnectWallet({ label: primaryWallet.label });
         }
 
-        const wallets = await onboard.connectWallet();
+        const wallets = connectOptions ? await onboard.connectWallet(connectOptions) : await onboard.connectWallet();
 
         if (wallets[0]) {
           setCurrentProvider(new ethers.providers.Web3Provider(
@@ -174,6 +218,12 @@ export default function Home() {
           ));
 
           const address = web3.utils.toChecksumAddress(wallets[0].accounts[0].address);
+          // save in local storage
+          const connectedWallets = wallets.map(({ label }) => label);
+          sessionStorage.setItem(
+            'connectedWallets',
+            JSON.stringify(connectedWallets),
+          );
           setCurrentAddress(address);
           setConnected(true);
         }
@@ -190,7 +240,7 @@ export default function Home() {
       setCurrentSession('');
       setCurrentProvider(null);
 
-      const wallets = await onboard.connectWallet();
+      const wallets = connectOptions ? await onboard.connectWallet(connectOptions) : await onboard.connectWallet();
 
       if (wallets[0]) {
         setCurrentProvider(new ethers.providers.Web3Provider(
@@ -199,6 +249,12 @@ export default function Home() {
         ));
 
         const address = web3.utils.toChecksumAddress(wallets[0].accounts[0].address);
+        // save in local storage
+        const connectedWallets = wallets.map(({ label }) => label);
+        window.sessionStorage.setItem(
+          'connectedWallets',
+          JSON.stringify(connectedWallets),
+        );
         setCurrentAddress(address);
         setConnected(true);
       }
@@ -213,12 +269,14 @@ export default function Home() {
             const address = web3.utils.toChecksumAddress(response[0]);
             setCurrentAddress(address);
             setConnected(true);
+            sessionStorage.setItem("currentConnectedWallet", address);
           } else {
             setCurrentAddress('');
             setConnected(false);
             setCurrentMsg('');
             setCurrentSession('');
             setCurrentProvider(null);
+            sessionStorage.clear();
           }
         });
       }
@@ -268,6 +326,7 @@ export default function Home() {
       // request signMessage on Metamask
       const signature = await signer.signMessage(message);
       setCurrentMsg(JSON.stringify({ message, signature }, null, 2));
+      sessionStorage.setItem("lastSiweMsg", JSON.stringify({ message, signature }, null, 2));
     } catch {
       alert('User rejected signing the message. Please try again.');
     }
@@ -303,6 +362,7 @@ export default function Home() {
         .then(res => {
           const { user_id, unblock_session_id } = res.data;
           setCurrentSession(JSON.stringify({ user_id, unblock_session_id }, null, 2));
+          sessionStorage.setItem("lastSession", JSON.stringify({ user_id, unblock_session_id }, null, 2));
           setLoading(false);
         })
         .catch(error => {
@@ -327,7 +387,7 @@ export default function Home() {
         <Box sx={{ my: 4 }}>
           <InfoDisclaimer text={disclaimerText} />
           <Button
-            onClick={handleConnectWallet}
+            onClick={() => handleConnectWallet()}
             variant="contained"
             sx={{ backgroundColor: '#2A73FF' }}
           >
