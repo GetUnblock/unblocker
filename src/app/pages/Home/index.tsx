@@ -126,21 +126,21 @@ export default function Home() {
     // check if there is a wallet saved on local storage
     let walletLabel: string;
     const previouslyConnectedWallets = JSON.parse(
-      localStorage.getItem('connectedWallets'),
+      sessionStorage.getItem('connectedWallets'),
     );
     if (previouslyConnectedWallets && !currentProvider) {
       walletLabel = previouslyConnectedWallets[0];
       // Attempt to reconnect to wallet
       reconnectWallet();
 
-      const previousUrl = localStorage.getItem('lastUrl');
-      const previousSiweMessage = localStorage.getItem('lastSiweMsg');
+      const previousUrl = sessionStorage.getItem('lastUrl');
+      const previousSiweMessage = sessionStorage.getItem('lastSiweMsg');
       // restore previous Siwe Generated message & session if exist on localStorage
       if (previousUrl && previousSiweMessage) {
         setUrl(previousUrl);
         setCurrentMsg(previousSiweMessage);
 
-        const lastSession = localStorage.getItem('lastSession');
+        const lastSession = sessionStorage.getItem('lastSession');
         if (lastSession) {
           setCurrentSession(lastSession);
         }
@@ -156,9 +156,9 @@ export default function Home() {
     setCurrentSession('');
 
     // remove from storage previous information
-    localStorage.removeItem('lastUrl');
-    localStorage.removeItem('lastSiweMsg');
-    localStorage.removeItem('lastSession');
+    sessionStorage.removeItem('lastUrl');
+    sessionStorage.removeItem('lastSiweMsg');
+    sessionStorage.removeItem('lastSession');
     setOpenModal(true);
   };
 
@@ -178,7 +178,7 @@ export default function Home() {
     setChainList(chainResult);
     setChainId(chainResult[0].id);
     setUrl(event.target.value);
-    localStorage.setItem("lastUrl", event.target.value);
+    sessionStorage.setItem("lastUrl", event.target.value);
   };
 
   const handleChainChange = (event: SelectChangeEvent) => {
@@ -220,7 +220,7 @@ export default function Home() {
           const address = web3.utils.toChecksumAddress(wallets[0].accounts[0].address);
           // save in local storage
           const connectedWallets = wallets.map(({ label }) => label);
-          localStorage.setItem(
+          sessionStorage.setItem(
             'connectedWallets',
             JSON.stringify(connectedWallets),
           );
@@ -251,7 +251,7 @@ export default function Home() {
         const address = web3.utils.toChecksumAddress(wallets[0].accounts[0].address);
         // save in local storage
         const connectedWallets = wallets.map(({ label }) => label);
-        window.localStorage.setItem(
+        window.sessionStorage.setItem(
           'connectedWallets',
           JSON.stringify(connectedWallets),
         );
@@ -269,14 +269,14 @@ export default function Home() {
             const address = web3.utils.toChecksumAddress(response[0]);
             setCurrentAddress(address);
             setConnected(true);
-            localStorage.setItem("currentConnectedWallet", address);
+            sessionStorage.setItem("currentConnectedWallet", address);
           } else {
             setCurrentAddress('');
             setConnected(false);
             setCurrentMsg('');
             setCurrentSession('');
             setCurrentProvider(null);
-            localStorage.clear();
+            sessionStorage.clear();
           }
         });
       }
@@ -326,7 +326,7 @@ export default function Home() {
       // request signMessage on Metamask
       const signature = await signer.signMessage(message);
       setCurrentMsg(JSON.stringify({ message, signature }, null, 2));
-      localStorage.setItem("lastSiweMsg", JSON.stringify({ message, signature }, null, 2));
+      sessionStorage.setItem("lastSiweMsg", JSON.stringify({ message, signature }, null, 2));
     } catch {
       alert('User rejected signing the message. Please try again.');
     }
@@ -362,7 +362,7 @@ export default function Home() {
         .then(res => {
           const { user_id, unblock_session_id } = res.data;
           setCurrentSession(JSON.stringify({ user_id, unblock_session_id }, null, 2));
-          localStorage.setItem("lastSession", JSON.stringify({ user_id, unblock_session_id }, null, 2));
+          sessionStorage.setItem("lastSession", JSON.stringify({ user_id, unblock_session_id }, null, 2));
           setLoading(false);
         })
         .catch(error => {
