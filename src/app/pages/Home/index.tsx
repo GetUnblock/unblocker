@@ -379,9 +379,9 @@ export default function Home() {
           <Box sx={{ my: 4 }}>
             <InfoDisclaimer text={disclaimerLogin} />
             <Typography component='div' ref={loginCodeSnippet}>
-              Copy the User Id and Session Id below to use on any endpoint that requires&nbsp;
+              Copy the User Uuid and Session Id below to use on any endpoint that requires&nbsp;
               <Box component="span" fontWeight='bold'>
-                unblock-session-id & user_id
+                unblock-session-id & user_uuid
               </Box>
               &nbsp;fields:
             </Typography>
