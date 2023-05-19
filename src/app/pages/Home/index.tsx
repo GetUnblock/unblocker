@@ -301,8 +301,8 @@ export default function Home() {
     if (url && apiKey) {
       await axios.post(`${url}/auth/login`, loginBody, config)
         .then(res => {
-          const { user_id, unblock_session_id } = res.data;
-          setCurrentSession(JSON.stringify({ user_id, unblock_session_id }, null, 2));
+          const { user_uuid, unblock_session_id } = res.data;
+          setCurrentSession(JSON.stringify({ user_uuid, unblock_session_id }, null, 2));
           setLoading(false);
         })
         .catch(error => {
