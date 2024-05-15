@@ -26,7 +26,7 @@ export const CHAIN_LIST = [
     url: "https://api.getunblock.com",
   },
   {
-    id: "80001",
+    id: "80002",
     description: "Mumbai Testnet",
     url: "https://sandbox.getunblock.com",
   },
