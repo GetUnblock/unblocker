@@ -27,7 +27,7 @@ export const CHAIN_LIST = [
   },
   {
     id: "80002",
-    description: "Mumbai Testnet",
+    description: "Amoy Testnet",
     url: "https://sandbox.getunblock.com",
   },
   {
