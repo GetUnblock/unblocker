@@ -26,8 +26,8 @@ export const CHAIN_LIST = [
     url: "https://api.getunblock.com",
   },
   {
-    id: "80001",
-    description: "Mumbai Testnet",
+    id: "80002",
+    description: "Amoy Testnet",
     url: "https://sandbox.getunblock.com",
   },
   {
@@ -61,10 +61,10 @@ export const chains = [
     rpcUrl: 'https://polygon-mainnet.infura.io'
   },
   {
-    id: 80001,
+    id: 80002,
     token: 'MATIC',
-    label: 'Polygon Mumbai',
-    rpcUrl: 'https://rpc-mumbai.maticvigil.com/',
+    label: 'Polygon Amoy',
+    rpcUrl: 'https://rpc-amoy.polygon.technology',
   },
   {
     id: 10,
